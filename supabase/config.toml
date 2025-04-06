@@ -1,0 +1,5 @@
+
+project_id = "pgtyrqqmgfdodojmzpby"
+
+[functions.generate-messages]
+verify_jwt = true
