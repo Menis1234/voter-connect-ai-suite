@@ -1,20 +1,23 @@
 
-import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { 
-  Home, 
-  Users, 
-  MessageSquare, 
-  BarChart3, 
-  Calendar, 
-  MapPin, 
+import { useState, useEffect } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Home,
+  Users,
+  MessageSquare,
+  BarChart3,
+  Calendar,
+  MapPin,
   Settings,
   Menu,
   X,
   UserCheck,
-  MessageCircle
+  MessageCircle,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 type SidebarProps = {
@@ -23,7 +26,40 @@ type SidebarProps = {
 
 export function Sidebar({ className }: SidebarProps) {
   const [expanded, setExpanded] = useState(true);
+  const [userName, setUserName] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Fetch the logged-in user's information
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserName(user.user_metadata.full_name || user.email?.split("@")[0] || "User");
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: Home },
@@ -38,11 +74,13 @@ export function Sidebar({ className }: SidebarProps) {
   ];
 
   return (
-    <div className={cn(
-      "flex flex-col h-screen bg-sidebar text-sidebar-foreground border-r border-gray-200 dark:border-gray-800 transition-all duration-300",
-      expanded ? "w-64" : "w-20",
-      className
-    )}>
+    <div
+      className={cn(
+        "flex flex-col h-screen bg-sidebar text-sidebar-foreground border-r border-gray-200 dark:border-gray-800 transition-all duration-300",
+        expanded ? "w-64" : "w-20",
+        className
+      )}
+    >
       <div className="flex items-center justify-between px-4 py-6">
         {expanded ? (
           <h1 className="text-xl font-bold">VoterOS</h1>
@@ -58,7 +96,7 @@ export function Sidebar({ className }: SidebarProps) {
           {expanded ? <X size={20} /> : <Menu size={20} />}
         </Button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="space-y-1 px-2">
           {navigation.map((item) => {
@@ -83,21 +121,41 @@ export function Sidebar({ className }: SidebarProps) {
           })}
         </nav>
       </div>
-      
+
       <div className="p-4 border-t border-gray-200 dark:border-gray-800">
         {expanded ? (
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
-              A
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
+                {userName ? userName[0]?.toUpperCase() : "U"}
+              </div>
+              <div>
+                <p className="text-sm font-medium">{userName || "User"}</p>
+                <p className="text-xs text-muted-foreground">Campaign Manager</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-muted-foreground">Campaign Manager</p>
-            </div>
+            <Button
+              variant="ghost"
+              className="w-full flex items-center gap-x-3 px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50"
+              onClick={handleLogout}
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </Button>
           </div>
         ) : (
-          <div className="mx-auto h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
-            A
+          <div className="space-y-2">
+            <div className="mx-auto h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
+              {userName ? userName[0]?.toUpperCase() : "U"}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-full flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent/50"
+              onClick={handleLogout}
+            >
+              <LogOut size={20} />
+            </Button>
           </div>
         )}
       </div>

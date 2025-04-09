@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Table, 
   TableBody, 
@@ -36,15 +35,17 @@ import {
   Filter, 
   Download 
 } from "lucide-react";
-import { useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Delegate } from "@/types";
+import AddDelegateDialog from "@/components/delegates/AddDelegateDialog";
+import TanzanianFlag from "@/components/TanzanianFlag"; // Updated import
 
 const Delegates = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [delegates, setDelegates] = useState<Delegate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addDelegateOpen, setAddDelegateOpen] = useState(false);
   
   useEffect(() => {
     fetchDelegates();
@@ -97,7 +98,6 @@ const Delegates = () => {
     }
   };
   
-  // Filter delegates based on search term
   const filteredDelegates = searchTerm
     ? delegates.filter(delegate => 
         delegate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,13 +107,18 @@ const Delegates = () => {
     : delegates;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Delegates Network</h1>
-          <p className="text-muted-foreground">Manage and track your campaign delegates</p>
+    <div className="space-y-6 bg-gray-50 min-h-screen" style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+    }}>
+      <div className="flex justify-between items-center bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <TanzanianFlag className="w-12 h-8" /> {/* Updated to TanzanianFlag */}
+          <div>
+            <h1 className="text-3xl font-bold">Delegates Network</h1>
+            <p className="text-muted-foreground">Manage and track your campaign delegates</p>
+          </div>
         </div>
-        <Button className="flex items-center gap-1">
+        <Button className="flex items-center gap-1" onClick={() => setAddDelegateOpen(true)}>
           <Plus size={16} /> Add Delegate
         </Button>
       </div>
@@ -154,7 +159,8 @@ const Delegates = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Name</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead className="w-[200px]">Name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Region</TableHead>
                   <TableHead>Role</TableHead>
@@ -165,19 +171,32 @@ const Delegates = () => {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                       Loading delegates...
                     </TableCell>
                   </TableRow>
                 ) : filteredDelegates.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                       No delegates found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredDelegates.map((delegate) => (
                     <TableRow key={delegate.id}>
+                      <TableCell>
+                        {delegate.profile_picture ? (
+                          <img
+                            src={delegate.profile_picture}
+                            alt={delegate.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-500">{delegate.name.charAt(0)}</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div>{delegate.name}</div>
                       </TableCell>
@@ -239,6 +258,12 @@ const Delegates = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AddDelegateDialog 
+        open={addDelegateOpen} 
+        onClose={() => setAddDelegateOpen(false)} 
+        onDelegateAdded={fetchDelegates}
+      />
     </div>
   );
 };

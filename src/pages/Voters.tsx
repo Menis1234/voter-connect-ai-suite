@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -39,6 +38,7 @@ import {
 import { useVoters } from "@/hooks/useVoters";
 import AddVoterDialog from "@/components/voters/AddVoterDialog";
 import AssignDelegateDialog from "@/components/voters/AssignDelegateDialog";
+import TanzanianFlag from "@/components/TanzanianFlag"; // Updated import
 import { toast } from "sonner";
 
 const Voters = () => {
@@ -81,7 +81,6 @@ const Voters = () => {
     setAssignDelegateOpen(true);
   };
   
-  // Filter voters based on search term
   const filteredVoters = searchTerm
     ? voters.filter(voter => 
         voter.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,11 +91,16 @@ const Voters = () => {
     : voters;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Voters Database</h1>
-          <p className="text-muted-foreground">Manage and track your campaign voters</p>
+    <div className="space-y-6 bg-gray-50 min-h-screen" style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+    }}>
+      <div className="flex justify-between items-center bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <TanzanianFlag className="w-12 h-8" /> {/* Updated to TanzanianFlag */}
+          <div>
+            <h1 className="text-3xl font-bold">Voters Database</h1>
+            <p className="text-muted-foreground">Manage and track your campaign voters</p>
+          </div>
         </div>
         <Button className="flex items-center gap-1" onClick={() => setAddVoterOpen(true)}>
           <Plus size={16} /> Add Voter
@@ -139,7 +143,8 @@ const Voters = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Name</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead className="w-[200px]">Name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Region</TableHead>
                   <TableHead>Status</TableHead>
@@ -150,19 +155,32 @@ const Voters = () => {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                       Loading voters...
                     </TableCell>
                   </TableRow>
                 ) : filteredVoters.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                       No voters found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredVoters.map((voter) => (
                     <TableRow key={voter.id}>
+                      <TableCell>
+                        {voter.profile_picture ? (
+                          <img
+                            src={voter.profile_picture}
+                            alt={voter.full_name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-500">{voter.full_name.charAt(0)}</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div>{voter.full_name}</div>
                         {voter.delegate_id && (
