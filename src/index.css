@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Leaflet CSS */
+@import "leaflet/dist/leaflet.css";
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -80,7 +83,7 @@
 
 @layer components {
   .campaign-card {
-    @apply rounded-lg shadow-md p-4 bg-white dark:bg-gray-800 transition-all hover:shadow-lg;
+    @apply rounded-lg shadow-md p-4 bg-white dark:bg-gray-800 transition-all hover:shadow-lg hover:-translate-y-1;
   }
   
   .stats-card {
@@ -93,5 +96,38 @@
   
   .circle-icon-wrapper {
     @apply h-10 w-10 flex items-center justify-center rounded-full;
+  }
+
+  .decorative-header {
+    @apply bg-gradient-to-r from-primary to-secondary text-primary-foreground p-6 rounded-lg shadow-md mb-6;
+  }
+
+  .time-date-display {
+    @apply text-sm font-mono;
+  }
+
+  .layout-default {
+    --space-y: 1.5rem;
+  }
+
+  .layout-compact {
+    --space-y: 0.5rem;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: var(--space-y, 1.5rem);
+  }
+
+  .layout-compact .p-6 {
+    padding: 1rem;
+  }
+
+  .layout-compact .mb-6 {
+    margin-bottom: 1rem;
+  }
+
+  /* Add custom styles for the map */
+  .polling-station-map {
+    @apply h-[500px] w-full rounded-lg shadow-md;
   }
 }

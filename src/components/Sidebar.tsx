@@ -31,7 +31,6 @@ export function Sidebar({ className }: SidebarProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch the logged-in user's information
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
